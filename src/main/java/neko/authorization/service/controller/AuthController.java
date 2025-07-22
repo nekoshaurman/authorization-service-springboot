@@ -47,6 +47,10 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<String> refreshAccessToken(@RequestParam String refreshToken) {
+        if (authService.isTokenRevoked(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token. Token revoked");
+        }
+
         if (jwtUtils.validateJwtToken(refreshToken)) {
             String username = jwtUtils.getUsernameFromJwtToken(refreshToken);
 
@@ -55,6 +59,16 @@ public class AuthController {
             return ResponseEntity.ok(newAccessToken);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+        }
+    }
+
+    @PostMapping("/revoke")
+    public ResponseEntity<String> revokeToken(@RequestParam String token) {
+        if (jwtUtils.validateJwtToken(token)) {
+            authService.revokeToken(token);
+            return ResponseEntity.ok("Token has been revoked");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
         }
     }
 }

@@ -1,14 +1,17 @@
 package neko.authorization.service.service;
 
 import jakarta.transaction.Transactional;
+import neko.authorization.service.model.RevokedToken;
 import neko.authorization.service.model.Role;
 import neko.authorization.service.model.User;
+import neko.authorization.service.repository.RevokedTokenRepository;
 import neko.authorization.service.repository.UserRepository;
 import neko.authorization.service.security.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +20,9 @@ public class AuthService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RevokedTokenRepository revokedTokenRepository;
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
@@ -72,5 +78,16 @@ public class AuthService {
     public Set<Role> getUserRoles(String login) {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
         return user.getRoles();
+    }
+
+    public void revokeToken(String token) {
+        RevokedToken revokedToken = new RevokedToken();
+        revokedToken.setToken(token);
+        revokedToken.setRevokedAt(new Date());
+        revokedTokenRepository.save(revokedToken);
+    }
+
+    public boolean isTokenRevoked(String token) {
+        return revokedTokenRepository.existsByToken(token);
     }
 }
