@@ -118,4 +118,10 @@ public class AuthService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
         return user.getRoles().contains(Role.ADMIN);
     }
+
+    public boolean isUserPremium(String token) {
+        String login = jwtUtils.getUsernameFromJwtToken(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getRoles().contains(Role.PREMIUM_USER);
+    }
 }

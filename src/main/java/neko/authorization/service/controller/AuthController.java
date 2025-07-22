@@ -96,4 +96,32 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid operation" + e.getMessage());
         }
     }
+
+    @PostMapping("/admin")
+    public ResponseEntity<String> getAdminResources(@RequestParam String token) {
+        try {
+            if (authService.isUserAdmin(token)) {
+
+                return ResponseEntity.ok("You have permission to access admin resources");
+            } else {
+                return ResponseEntity.ok("You haven't permission to access admin resources");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid operation" + e.getMessage());
+        }
+    }
+
+    @PostMapping("/premium")
+    public ResponseEntity<String> getPremiumResources(@RequestParam String token) {
+        try {
+            if (authService.isUserPremium(token)) {
+
+                return ResponseEntity.ok("You have permission to access premium resources");
+            } else {
+                return ResponseEntity.ok("You haven't permission to access premium resources");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid operation" + e.getMessage());
+        }
+    }
 }
