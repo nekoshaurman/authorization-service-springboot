@@ -61,6 +61,14 @@ public class AuthService {
         return jwtUtils.generateJwtToken(user.getLogin(), user.getRoles());
     }
 
+    public String generateRefreshToken(String login) {
+        // Получаем пользователя
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Генерируем JWT токен с ролями пользователя
+        return jwtUtils.generateRefreshToken(user.getLogin(), user.getRoles());
+    }
+
     public Set<Role> getUserRoles(String login) {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
         return user.getRoles();

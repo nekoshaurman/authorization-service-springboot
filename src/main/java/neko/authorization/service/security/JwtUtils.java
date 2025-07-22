@@ -16,11 +16,14 @@ public class JwtUtils {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.expiration}")
+    @Value("${jwt.expiration-token}")
     private long expirationTime;
 
+    @Value("${jwt.expiration-refresh}")
+    private long expirationRefresh;
+
     public String generateJwtToken(String username, Set<Role> roles) {
-        Algorithm algorithm = Algorithm.HMAC512(secretKey);
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
 
         return JWT.create()
                 .withSubject(username)
@@ -30,15 +33,26 @@ public class JwtUtils {
                 .sign(algorithm);
     }
 
+    public String generateRefreshToken(String username, Set<Role> roles) {
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+
+        return JWT.create()
+                .withSubject(username)
+                .withClaim("roles", roles.toString())
+                .withIssuedAt(new Date())
+                .withExpiresAt(new Date(System.currentTimeMillis() + expirationRefresh))
+                .sign(algorithm);
+    }
+
     public String getUsernameFromJwtToken(String token) {
-        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(secretKey))
+        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(secretKey))
                 .build()
                 .verify(token);
         return decodedJWT.getSubject();
     }
 
     public boolean isTokenExpired(String token) {
-        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC512(secretKey))
+        DecodedJWT decodedJWT = JWT.require(Algorithm.HMAC256(secretKey))
                 .build()
                 .verify(token);
         return decodedJWT.getExpiresAt().before(new Date());
@@ -46,7 +60,7 @@ public class JwtUtils {
 
     public boolean validateJwtToken(String token) {
         try {
-            JWT.require(Algorithm.HMAC512(secretKey))
+            JWT.require(Algorithm.HMAC256(secretKey))
                     .build()
                     .verify(token);
             return true;

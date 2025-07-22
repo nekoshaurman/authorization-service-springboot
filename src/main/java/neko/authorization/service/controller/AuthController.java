@@ -35,10 +35,26 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<String> loginUser(@RequestParam String login, @RequestParam String password) {
         if (authService.authenticateUser(login, password)) {
-            String token = authService.generateJwtToken(login);
-            return ResponseEntity.ok(token);
+            String accessToken = authService.generateJwtToken(login);
+
+            String refreshToken = authService.generateRefreshToken(login);
+
+            return ResponseEntity.ok(accessToken + " " + refreshToken);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<String> refreshAccessToken(@RequestParam String refreshToken) {
+        if (jwtUtils.validateJwtToken(refreshToken)) {
+            String username = jwtUtils.getUsernameFromJwtToken(refreshToken);
+
+            String newAccessToken = authService.generateJwtToken(username);
+
+            return ResponseEntity.ok(newAccessToken);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
     }
 }
