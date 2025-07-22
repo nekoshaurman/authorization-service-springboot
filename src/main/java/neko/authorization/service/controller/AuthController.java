@@ -1,5 +1,6 @@
 package neko.authorization.service.controller;
 
+import neko.authorization.service.model.Role;
 import neko.authorization.service.security.JwtUtils;
 import neko.authorization.service.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,7 @@ public class AuthController {
 
             return ResponseEntity.ok(newAccessToken);
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid refresh token");
         }
     }
 
@@ -68,7 +69,31 @@ public class AuthController {
             authService.revokeToken(token);
             return ResponseEntity.ok("Token has been revoked");
         } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid token");
+        }
+    }
+
+    @PostMapping("/debug-role")
+    public ResponseEntity<String> giveAdminToUser(@RequestParam String login) {
+        try {
+            authService.updateUserRoles(login, "ADMIN");
+            return ResponseEntity.ok("Give ADMIN role to " + login);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid operation: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/add-role")
+    public ResponseEntity<String> addRoleToUser(@RequestParam String token, @RequestParam String login, @RequestParam String role) {
+        try {
+            if (authService.isUserAdmin(token)) {
+                authService.updateUserRoles(login, role);
+                return ResponseEntity.ok("Give " + role + " role to " + login);
+            } else {
+                return ResponseEntity.ok("User with " + token + " token not ADMIN");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid operation" + e.getMessage());
         }
     }
 }

@@ -80,6 +80,28 @@ public class AuthService {
         return user.getRoles();
     }
 
+    public void updateUserRoles(String login, String role) {
+        Role validRole = validRole(role);
+
+        if (validRole != null) {
+            User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+            Set<Role> roles = getUserRoles(login);
+
+            roles.add(validRole);
+            user.setRoles(roles);
+
+            userRepository.save(user);
+        }
+    }
+
+    private Role validRole(String roleName) {
+        try {
+            return Role.valueOf(roleName.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
     public void revokeToken(String token) {
         RevokedToken revokedToken = new RevokedToken();
         revokedToken.setToken(token);
@@ -89,5 +111,11 @@ public class AuthService {
 
     public boolean isTokenRevoked(String token) {
         return revokedTokenRepository.existsByToken(token);
+    }
+
+    public boolean isUserAdmin(String token) {
+        String login = jwtUtils.getUsernameFromJwtToken(token);
+        User user = userRepository.findByLogin(login).orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getRoles().contains(Role.ADMIN);
     }
 }
