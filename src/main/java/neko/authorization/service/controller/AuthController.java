@@ -1,8 +1,8 @@
 package neko.authorization.service.controller;
 
-import neko.authorization.service.model.Role;
 import neko.authorization.service.security.JwtUtils;
 import neko.authorization.service.service.AuthService;
+import neko.authorization.service.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +17,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -73,34 +76,10 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/debug-role")
-    public ResponseEntity<String> giveAdminToUser(@RequestParam String login) {
-        try {
-            authService.updateUserRoles(login, "ADMIN");
-            return ResponseEntity.ok("Give ADMIN role to " + login);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid operation: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/add-role")
-    public ResponseEntity<String> addRoleToUser(@RequestParam String token, @RequestParam String login, @RequestParam String role) {
-        try {
-            if (authService.isUserAdmin(token)) {
-                authService.updateUserRoles(login, role);
-                return ResponseEntity.ok("Give " + role + " role to " + login);
-            } else {
-                return ResponseEntity.ok("User with " + token + " token not ADMIN");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid operation" + e.getMessage());
-        }
-    }
-
     @PostMapping("/admin")
     public ResponseEntity<String> getAdminResources(@RequestParam String token) {
         try {
-            if (authService.isUserAdmin(token)) {
+            if (roleService.isUserAdmin(token)) {
 
                 return ResponseEntity.ok("You have permission to access admin resources");
             } else {
@@ -114,7 +93,7 @@ public class AuthController {
     @PostMapping("/premium")
     public ResponseEntity<String> getPremiumResources(@RequestParam String token) {
         try {
-            if (authService.isUserPremium(token)) {
+            if (roleService.isUserPremium(token)) {
 
                 return ResponseEntity.ok("You have permission to access premium resources");
             } else {
