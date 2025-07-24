@@ -65,7 +65,7 @@ POST http://localhost:8080/auth/revoke?token=your_token
 
 ### debug-role
 **Это чтобы не лезть в бд :)**  
-**URL:** /auth/debug-role  
+**URL:** /role/debug-role  
 **Method:** POST
 
 **Params:**
@@ -73,11 +73,11 @@ POST http://localhost:8080/auth/revoke?token=your_token
 
 **Example:**
 ```bash
-POST http://localhost:8080/auth/debug-role?login=testuser
+POST http://localhost:8080/role/debug-role?login=testuser
 ```
 
 ### add-role
-**URL:** /auth/add-role  
+**URL:** /role/add-role  
 **Method:** POST
 
 **Params:**
@@ -87,7 +87,7 @@ POST http://localhost:8080/auth/debug-role?login=testuser
 
 **Example:**
 ```bash
-POST http://localhost:8080/auth/add-role?token=admin_token&login=testuser&role=ADMIN
+POST http://localhost:8080/role/add-role?token=admin_token&login=testuser&role=ADMIN
 ```
 
 ### admin
